@@ -7,72 +7,76 @@ public class FlashCards {
     private static final int numCards = 27;
     
     private static Card[] loadDeck() {
-        Card[] deck = new Card[numCards];
-        
-        deck[0] = new Card("Abstraction", "Hiding complex reality while exposing only essential parts");
-        deck[1] = new Card("Algorithm", "A step-by-step procedure to solve a problem");
-        deck[2] = new Card("Assertion", "A statement that a predicate is always true at that point in code execution");
-        deck[3] = new Card("Class", "A template encapsulating data and code that manipulates it");
-        deck[4] = new Card("Constructor", "A special class member that creates and initializes an object from the class");
-        deck[5] = new Card("Copyright", "Legal protection for original works of authorship");
-        deck[6] = new Card("Data Validation", "Process of ensuring data is correct and useful");
-        deck[7] = new Card("Declaration", "Statement that establishes a variable's name and type");
-        deck[8] = new Card("Definition", "Implementation of a variable, method, or class");
-        deck[9] = new Card("Encapsulation", "Bundling of data with methods that operate on that data");
-        deck[10] = new Card("Enumerated type", "A data type consisting of a set of named values");
-        deck[11] = new Card("Exception", "An event that occurs during execution that disrupts normal flow");
-        deck[12] = new Card("Field", "A variable that belongs to an object or class");
-        deck[13] = new Card("Getter", "A method that returns the value of a private variable");
-        deck[14] = new Card("Intellectual Property", "Creations of the mind that have legal protections");
-        deck[15] = new Card("Invariant", "A condition that is always true during execution of a program");
-        deck[16] = new Card("Method", "A function that is associated with an object");
-        deck[17] = new Card("Object", "An instance of a class containing data and behavior");
-        deck[18] = new Card("Object-Oriented Programming (OOP)", "Programming paradigm based on objects");
-        deck[19] = new Card("Operator", "A symbol that represents a specific mathematical or logical action");
-        deck[20] = new Card("Patent", "Exclusive right granted for an invention");
-        deck[21] = new Card("Setter", "A method that sets the value of a private variable");
-        deck[22] = new Card("Shadowing", "When a variable in a inner scope has the same name as in outer scope");
-        deck[23] = new Card("Trademark", "A recognizable sign identifying products or services");
-        deck[24] = new Card("Unified Modeling Language (UML)", "Standardized modeling language for software design");
-        deck[25] = new Card("Validation Rules", "Constraints that data must satisfy");
-        deck[26] = new Card("Variable", "A named storage location that can hold a value");
-        
-        return deck;
+        Card[] cards = new Card[numCards];
+        int i = 0;
+        cards[i++] = new Card("Abstraction", "Specifying a general interface while hiding implementation details");
+        cards[i++] = new Card("Algorithm", "A procedure for solving a specific problem, expressed as an ordered set of actions");
+        cards[i++] = new Card("Assertion", "An expression that, if false, indicates a program error");
+        cards[i++] = new Card("Class", "A template encapsulating data and code that manipulates it");
+        cards[i++] = new Card("Constructor", "A special class member that creates and initializes an object from the class");
+        cards[i++] = new Card("Copyright", "Exclusive right to print, publish, perform, execute, or record a creative work or its derivatives, and to authorize others to do the same");
+        cards[i++] = new Card("Data Validation", "Ensuring that a program operates on clean, correct and useful data");
+        cards[i++] = new Card("Declaration", "A statement that introduces a name with an associated type into a scope");
+        cards[i++] = new Card("Definition", "A declaration that also fully specifies the entity declared");
+        cards[i++] = new Card("Encapsulation", "Bundling data and code into a restricted container");
+        cards[i++] = new Card("Enumerated type", "A data type that includes a fixed set of constant values called enumerators");
+        cards[i++] = new Card("Exception", "An object created to represent an error or other unusual occurrence and then propagated via special mechanisms until caught by special handling code");
+        cards[i++] = new Card("Field", "A class member variable");
+        cards[i++] = new Card("Getter", "A method that returns the value of a private variable");
+        cards[i++] = new Card("Intellectual Property", "Exclusive right to authors and inventors to their writing and discoveries");
+        cards[i++] = new Card("Invariant", "Code for which specified assertions are guaranteed to be true");
+        cards[i++] = new Card("Method", "A function that manipulates data in a class");
+        cards[i++] = new Card("Object", "An instance of a class containing a set of encapsulated data and associated methods");
+        cards[i++] = new Card("Object-Oriented Programming (OOP)", "A style of programming focused on the use of classes and class hierarchies");
+        cards[i++] = new Card("Operator", "A short string representing a mathematical, logical, or machine control action");
+        cards[i++] = new Card("Patent", "Exclusive right to make, use, or sell an invention, and authorize others to do the same");
+        cards[i++] = new Card("Setter", "A method that changes the value of a private variable");
+        cards[i++] = new Card("Shadowing", "A variable declared in a narrower scope than that of a variable of the same name declared in a broader scope");
+        cards[i++] = new Card("Trademark", "Symbol or name established by use as representing a company or product");
+        cards[i++] = new Card("Unified Modeling Language (UML)", "The standard visual modeling language used to describe, specify, design, and document the structure and behavior of object-oriented systems");
+        cards[i++] = new Card("Validation Rules", "Algorithmically enforceable constraints on the correctness, meaningfulness, and security of input data");
+        cards[i++] = new Card("Variable", "A block of memory associated with a symbolic name that contains a primitive data value or the address of an object instance");
+        return cards;
     }
     
     public static void main(String[] args) {
+        // Load the deck of cards
         Card[] deck = loadDeck();
         
+        // Show all the terms to the user
         System.out.println("FLASH CARDS");
         System.out.println("===========");
         System.out.println("\nVocabulary terms:");
-        
         for (Card card : deck) {
             System.out.println("* " + card.getTerm());
         }
-        
         System.out.println();
-        
+
+        // Main game loop
         while (true) {
+            // Pick a random card
             int index = random.nextInt(deck.length);
             Card currentCard = deck[index];
             
+            // Show the definition
             System.out.println(currentCard);
+            
+            // Ask for the term
             System.out.print("Which term matches this definition ('q' to exit)? ");
+            String answer = scanner.nextLine();
             
-            String response = scanner.nextLine().trim();
-            
-            if (response.equalsIgnoreCase("q")) {
+            // Check if user wants to quit
+            if (answer.equalsIgnoreCase("q")) {
                 System.out.println("Goodbye!");
                 break;
             }
             
-            if (currentCard.attempt(response)) {
+            // Check if answer is correct
+            if (currentCard.attempt(answer)) {
                 System.out.println("Correct!");
             } else {
                 System.out.println("No, the term is " + currentCard.getTerm());
             }
-            
             System.out.println();
         }
         
