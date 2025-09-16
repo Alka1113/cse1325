@@ -1,0 +1,59 @@
+@startuml
+' P04_Requirements_rev_1.pdf - PlantUML Representation
+' This file generates the UML class diagram for the Polygon assignment.
+
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+hide empty members
+hide circle
+
+
+class Point {
+  - x : double
+  - y : double
+  + Point(x : double, y : double)
+  + Point()
+  + getX() : double
+  + getY() : double
+  + equals(o : Object) : boolean
+  + hashCode() : int
+  + toString() : String
+}
+
+class Polygon {
+  + {static} MAX_SIDES : int = 12
+  - numSides : int
+  - points : Point[]
+  + addPoint(point : Point)
+  + perimeter() : double
+  + toString() : String
+  - {static} lineLength(p1 : Point, p2 : Point) : double
+}
+
+class TestPolygon {
+  - {static} in : Scanner
+  - {static} rand : Random
+  + {static} main(args : String[])
+}
+
+Polygon "1" *-- "*" Point : contains >
+
+TestPolygon ..> Polygon : uses >
+TestPolygon ..> Point : uses >
+
+note top of Point
+  <<override>>
+  equals()
+  hashCode()
+  toString()
+end note
+
+note top of Polygon
+  <<override>>
+  toString()
+end note
+@enduml
