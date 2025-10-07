@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<project name="CSE1325" default="build">
+
+  <target name="build" description="Compile source tree java files">
+    <javac includeantruntime="false" debug="true" failonerror="true">
+      <src path="."/>
+    </javac>
+  </target>
+
+  <target name="clean" description="Clean output files">
+    <delete>
+      <fileset dir=".">
+        <include name="**/*.class"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="test" depends="build" description="Run tests">
+    <java classname="TestPerson" classpath="." failonerror="true"/>
+    <java classname="TestRating" classpath="." failonerror="true"/>
+  </target>
+
+  <target name="run-demo" depends="build" description="Run demo">
+    <java classname="DemoRatingSystem" classpath="." failonerror="true"/>
+  </target>
+
+  <target name="demo-course" depends="build" description="Run Course demo">
+    <java classname="DemoCourse" classpath="." failonerror="true"/>
+  </target>
+
+  <target name="demo-student" depends="build" description="Run Student demo">
+    <java classname="DemoStudent" classpath="." failonerror="true"/>
+  </target>
+
+  <target name="demo-tutor" depends="build" description="Run Tutor demo">
+    <java classname="DemoTutor" classpath="." failonerror="true"/>
+  </target>
+
+  <target name="demo-rateable" depends="build" description="Run Rateable demo">
+    <java classname="DemoRateablePerson" classpath="." failonerror="true"/>
+  </target>
+
+  <target name="all-demos" depends="demo-course,demo-student,demo-tutor,demo-rateable" 
+          description="Run all demos">
+    <echo>All demos completed!</echo>
+  </target>
+</project>
