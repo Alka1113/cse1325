@@ -1,3 +1,4 @@
+package session;
 import java.util.Objects;
 
 public class Course {

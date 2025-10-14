@@ -1,3 +1,4 @@
+package session;
 public class InvalidCourseException extends IllegalArgumentException {
     public InvalidCourseException(String dept) {
         super("Invalid dept in new Course: " + dept);

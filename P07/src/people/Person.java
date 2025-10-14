@@ -1,3 +1,6 @@
+package people;
+import rating.Rateable;
+import rating.Rating;
 import java.util.ArrayList;
 import java.util.Objects;
 
