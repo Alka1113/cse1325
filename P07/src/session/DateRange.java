@@ -5,8 +5,9 @@ public class DateRange {
     private String startTime;
     private String endTime;
 
-    public void DateRange(String date, String startTime, String endTime){
-        if(date==null || date.isEmpty() || startTime== null ||endTime==null){
+
+    public  DateRange(String date, String startTime, String endTime){
+        if(date==null || date.isEmpty() || startTime== null || endTime==null){
               throw new IllegalArgumentException("Invalid arguments");
         }
         this.date=date;
@@ -14,7 +15,7 @@ public class DateRange {
         this.endTime=endTime;
     }
       
-     public void DateRange(String date, String startTime, long duration){
+     public  DateRange(String date, String startTime, long duration){
         if(date==null || date.isEmpty() || startTime== null){
               throw new IllegalArgumentException("Invalid arguments");
         }
