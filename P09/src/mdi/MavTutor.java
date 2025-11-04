@@ -7,13 +7,12 @@ import people.Tutor;
 import session.Course;
 import session.Session;
 import session.InvalidCourseException;
+
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Scanner;
 import java.io.IOException;
-
 import java.util.List;
-import java.io.File;
 import java.util.ArrayList;
 
 public class MavTutor {
@@ -23,21 +22,20 @@ public class MavTutor {
     private List<Session> sessions = new ArrayList<>();
     private List<?> view = courses;
     private Menu menu;
-
     
     private File file = null;
+    
     public MavTutor() {
         initializeMenu();
     }
     
     private void initializeMenu() {
-        // Create menu with pre and post objects
         String clearScreen = "\n".repeat(50);
         String title = "MavTutor Main Menu\n" + "=".repeat(18) + "\n";
         
         menu = new Menu(
-            new Object[] {clearScreen, title},  // pre - clear screen and title
-            new Object[] {this, "\nSelection? "}, // post - current view and prompt
+            new Object[] {clearScreen, title},  
+            new Object[] {this, "\nSelection? "}, 
             new MenuItem("Create Course", this::newCourse),
             new MenuItem("Create Student", this::newStudent),
             new MenuItem("Create Tutor", this::newTutor),
@@ -46,18 +44,115 @@ public class MavTutor {
             new MenuItem("View Students", () -> selectView(students)),
             new MenuItem("View Tutors", () -> selectView(tutors)),
             new MenuItem("View Sessions", () -> selectView(sessions)),
-            new MenuItem("Quit", this::quit)
             new MenuItem("New", this::newz),
-            new MenuItem("Save As", this::saveAs), 
+            new MenuItem("Save As", this::saveAs),
             new MenuItem("Save", this::save),
-            new MenuItem("Open", this::open)
+            new MenuItem("Open", this::open),
+            new MenuItem("Quit", this::quit)
         );
     }
-    private void newz() {}
-    private void saveAs() {} 
-    private void save() {}
-    private void open() {}
 
+    
+    private void newz() {
+        courses.clear();
+        students.clear();
+        tutors.clear();
+        sessions.clear();
+        file = null;
+        menu.result = new StringBuilder("All data cleared.");
+    }
+    
+    private void saveAs() {
+        file = null;
+        save();
+    }
+    
+    private void save() {
+        try {
+            if (file == null) {
+                file = Menu.selectFile("Save As", false);
+            }
+            
+            if (file != null) {
+                try (PrintStream out = new PrintStream(file)) {
+
+                    out.println(courses.size());
+                    for (Course course : courses) {
+                        course.save(out);
+                    }
+                    
+                    out.println(students.size());
+                    for (Student student : students) {
+                        student.save(out);
+                    }
+                    
+                    out.println(tutors.size());
+                    for (Tutor tutor : tutors) {
+                        tutor.save(out);
+                    }
+                    
+                    out.println(sessions.size());
+                    for (Session session : sessions) {
+                        session.save(out);
+                    }
+                }
+                menu.result = new StringBuilder("Data saved to " + file.getName());
+            }
+        } catch (IOException e) {
+            menu.result = new StringBuilder("Error saving file: " + e.getMessage());
+        }
+    }
+    
+    private void open() { 
+        try {
+            File openFile = Menu.selectFile("Open", true);
+            if (openFile != null) {
+                try (Scanner in = new Scanner(openFile)) {
+
+                    courses.clear();
+                    students.clear();
+                    tutors.clear();
+                    sessions.clear();
+                    file = openFile;
+                    
+                    int size = in.nextInt();
+                    in.nextLine(); 
+                    for (int i = 0; i < size; i++) {
+                        courses.add(new Course(in));
+                    }
+                    
+                    size = in.nextInt();
+                    in.nextLine();
+                    for (int i = 0; i < size; i++) {
+                        students.add(new Student(in));
+                    }
+                    
+                    size = in.nextInt();
+                    in.nextLine();
+                    for (int i = 0; i < size; i++) {
+                        tutors.add(new Tutor(in));
+                    }
+                    
+                    size = in.nextInt();
+                    in.nextLine();
+                    for (int i = 0; i < size; i++) {
+                        sessions.add(new Session(in));
+                    }
+                }
+                menu.result = new StringBuilder("Data loaded from " + openFile.getName());
+            }
+        } catch (IOException e) {
+            menu.result = new StringBuilder("Error loading file: " + e.getMessage());
+            newz(); 
+        } catch (Exception e) {
+            menu.result = new StringBuilder("Error parsing file: " + e.getMessage());
+            newz(); 
+        }
+    }
+}
+    
+    
+    
     public void newCourse() {
         try {
             String dept = Menu.getString("Enter department (3-4 letters): ");
@@ -180,7 +275,7 @@ public class MavTutor {
     }
     
     public void quit() {
-        menu.result = null; // Signals menu to exit
+        menu.result = null; 
     }
     
     @Override
