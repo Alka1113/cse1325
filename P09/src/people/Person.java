@@ -1,6 +1,9 @@
 package people;
+
 import rating.Rateable;
 import rating.Rating;
+import java.io.PrintStream;
+import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -17,9 +20,25 @@ public class Person implements Rateable {
         this.email = email;
         this.ratings = new ArrayList<>(); 
     }
+    
+    public Person(Scanner in) {
+        this.name = in.nextLine();
+        this.email = in.nextLine();
+        this.ratings = new ArrayList<>();
+        
+    }
+
+    public void save(PrintStream out) {
+        out.println(name);
+        out.println(email);
+    }
 
     public String getName() {
         return name;
+    }
+    
+    public String getEmail() {
+        return email;
     }
 
     @Override
