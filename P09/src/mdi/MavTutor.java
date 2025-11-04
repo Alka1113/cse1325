@@ -7,8 +7,13 @@ import people.Tutor;
 import session.Course;
 import session.Session;
 import session.InvalidCourseException;
+import java.io.File;
+import java.io.PrintStream;
+import java.util.Scanner;
+import java.io.IOException;
 
 import java.util.List;
+import java.io.File;
 import java.util.ArrayList;
 
 public class MavTutor {
@@ -18,7 +23,9 @@ public class MavTutor {
     private List<Session> sessions = new ArrayList<>();
     private List<?> view = courses;
     private Menu menu;
+
     
+    private File file = null;
     public MavTutor() {
         initializeMenu();
     }
@@ -40,9 +47,17 @@ public class MavTutor {
             new MenuItem("View Tutors", () -> selectView(tutors)),
             new MenuItem("View Sessions", () -> selectView(sessions)),
             new MenuItem("Quit", this::quit)
+            new MenuItem("New", this::newz),
+            new MenuItem("Save As", this::saveAs), 
+            new MenuItem("Save", this::save),
+            new MenuItem("Open", this::open)
         );
     }
-    
+    private void newz() {}
+    private void saveAs() {} 
+    private void save() {}
+    private void open() {}
+
     public void newCourse() {
         try {
             String dept = Menu.getString("Enter department (3-4 letters): ");
