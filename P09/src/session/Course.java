@@ -1,4 +1,7 @@
 package session;
+
+import java.io.PrintStream;
+import java.util.Scanner;
 import java.util.Objects;
 
 public class Course {
@@ -18,6 +21,19 @@ public class Course {
         this.number = number;
     }
     
+    // Restore constructor
+    public Course(Scanner in) {
+        this.dept = in.nextLine();
+        this.number = in.nextInt();
+        in.nextLine(); 
+    }
+    
+    // Save method
+    public void save(PrintStream out) {
+        out.println(dept);
+        out.println(number);
+    }
+    
     @Override
     public String toString() {
         return dept + number;
@@ -34,5 +50,14 @@ public class Course {
     @Override
     public int hashCode() {
         return Objects.hash(dept, number);
+    }
+    
+    // Getters for dept and number
+    public String getDept() {
+        return dept;
+    }
+    
+    public int getNumber() {
+        return number;
     }
 }
