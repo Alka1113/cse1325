@@ -2,6 +2,8 @@ package session;
 
 import people.Tutor;
 import people.Student;
+import java.io.PrintStream;
+import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -19,19 +21,45 @@ public class Session {
         this.tutor = tutor;
         this.students = new ArrayList<>();
     }
-     public void setSchedule(String date, String startTime, String endTime) {
+    
+
+    public Session(Scanner in) {
+        this.course = new Course(in);
+        this.schedule = new DateRange(in);
+        this.tutor = new Tutor(in);
+        this.students = new ArrayList<>();
+        int size = in.nextInt();
+        in.nextLine(); 
+        for (int i = 0; i < size; i++) {
+            students.add(new Student(in));
+        }
+    }
+    
+    public void save(PrintStream out) {
+        course.save(out);
+        schedule.save(out);
+        tutor.save(out);
+        out.println(students.size());
+        for (Student student : students) {
+            student.save(out);
+        }
+    }
+
+    public void setSchedule(String date, String startTime, String endTime) {
         this.schedule = new DateRange(date, startTime, endTime);
     }
 
-        public void setSchedule(String date, String startTime, int durationMinutes) {
+    public void setSchedule(String date, String startTime, int durationMinutes) {
         this.schedule = new DateRange(date, startTime, durationMinutes);
     }
-       public void addStudent(Student student) {
+    
+    public void addStudent(Student student) {
         if (student != null) {
             students.add(student);
         }
     }
-     @Override
+    
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Session on ");
@@ -50,6 +78,7 @@ public class Session {
         }
         return sb.toString();
     }
+    
     public Course getCourse() { return course; }
     public Tutor getTutor() { return tutor; }
     public List<Student> getStudents() { return students; }
