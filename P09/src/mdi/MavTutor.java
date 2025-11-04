@@ -22,8 +22,8 @@ public class MavTutor {
     private List<Session> sessions = new ArrayList<>();
     private List<?> view = courses;
     private Menu menu;
-    
     private File file = null;
+    private boolean dirty = false;
     
     public MavTutor() {
         initializeMenu();
@@ -51,14 +51,18 @@ public class MavTutor {
             new MenuItem("Quit", this::quit)
         );
     }
-
     
     private void newz() {
+        if (!safeToDiscardData()) {
+            menu.result = new StringBuilder("Operation cancelled.");
+            return;
+        }
         courses.clear();
         students.clear();
         tutors.clear();
         sessions.clear();
         file = null;
+        dirty = false;
         menu.result = new StringBuilder("All data cleared.");
     }
     
@@ -70,12 +74,12 @@ public class MavTutor {
     private void save() {
         try {
             if (file == null) {
-                file = Menu.selectFile("Save As", false);
+                String filename = Menu.getString("Enter filename to save: ");
+                file = new File(filename);
             }
             
             if (file != null) {
                 try (PrintStream out = new PrintStream(file)) {
-
                     out.println(courses.size());
                     for (Course course : courses) {
                         course.save(out);
@@ -96,6 +100,7 @@ public class MavTutor {
                         session.save(out);
                     }
                 }
+                dirty = false;
                 menu.result = new StringBuilder("Data saved to " + file.getName());
             }
         } catch (IOException e) {
@@ -103,55 +108,81 @@ public class MavTutor {
         }
     }
     
-    private void open() { 
+    private void open() {
+        if (!safeToDiscardData()) {
+            menu.result = new StringBuilder("Operation cancelled.");
+            return;
+        }
+        
         try {
-            File openFile = Menu.selectFile("Open", true);
-            if (openFile != null) {
-                try (Scanner in = new Scanner(openFile)) {
-
-                    courses.clear();
-                    students.clear();
-                    tutors.clear();
-                    sessions.clear();
-                    file = openFile;
-                    
-                    int size = in.nextInt();
-                    in.nextLine(); 
-                    for (int i = 0; i < size; i++) {
-                        courses.add(new Course(in));
-                    }
-                    
-                    size = in.nextInt();
-                    in.nextLine();
-                    for (int i = 0; i < size; i++) {
-                        students.add(new Student(in));
-                    }
-                    
-                    size = in.nextInt();
-                    in.nextLine();
-                    for (int i = 0; i < size; i++) {
-                        tutors.add(new Tutor(in));
-                    }
-                    
-                    size = in.nextInt();
-                    in.nextLine();
-                    for (int i = 0; i < size; i++) {
-                        sessions.add(new Session(in));
-                    }
-                }
-                menu.result = new StringBuilder("Data loaded from " + openFile.getName());
+            String filename = Menu.getString("Enter filename to open: ");
+            File openFile = new File(filename);
+            
+            if (!openFile.exists()) {
+                menu.result = new StringBuilder("File not found: " + filename);
+                return;
             }
+            
+            try (Scanner in = new Scanner(openFile)) {
+                courses.clear();
+                students.clear();
+                tutors.clear();
+                sessions.clear();
+                file = openFile;
+                
+                int size = in.nextInt();
+                in.nextLine();
+                for (int i = 0; i < size; i++) {
+                    courses.add(new Course(in));
+                }
+                
+                size = in.nextInt();
+                in.nextLine();
+                for (int i = 0; i < size; i++) {
+                    students.add(new Student(in));
+                }
+                
+                size = in.nextInt();
+                in.nextLine();
+                for (int i = 0; i < size; i++) {
+                    tutors.add(new Tutor(in));
+                }
+                
+                size = in.nextInt();
+                in.nextLine();
+                for (int i = 0; i < size; i++) {
+                    sessions.add(new Session(in));
+                }
+            }
+            dirty = false;
+            menu.result = new StringBuilder("Data loaded from " + openFile.getName());
         } catch (IOException e) {
             menu.result = new StringBuilder("Error loading file: " + e.getMessage());
-            newz(); 
+            newz();
         } catch (Exception e) {
             menu.result = new StringBuilder("Error parsing file: " + e.getMessage());
-            newz(); 
+            newz();
         }
     }
-}
     
-    
+    private boolean safeToDiscardData() {
+        if (!dirty) return true;
+        
+        while (true) {
+            String response = Menu.getString("Unsaved data exists. (S)ave, (D)iscard, or (A)bort? ");
+            if (response.equalsIgnoreCase("S")) {
+                save();
+                return !dirty;
+            } else if (response.equalsIgnoreCase("D")) {
+                dirty = false;
+                return true;
+            } else if (response.equalsIgnoreCase("A")) {
+                return false;
+            } else {
+                menu.result = new StringBuilder("Please enter S, D, or A");
+            }
+        }
+    }
     
     public void newCourse() {
         try {
@@ -161,6 +192,7 @@ public class MavTutor {
             Course course = new Course(dept, number);
             if (!courses.contains(course)) {
                 courses.add(course);
+                dirty = true;
                 menu.result = new StringBuilder("Course created: " + course);
             } else {
                 menu.result = new StringBuilder("Course already exists: " + course);
@@ -193,6 +225,7 @@ public class MavTutor {
             }
             
             students.add(student);
+            dirty = true;
             menu.result = new StringBuilder("Student created: " + student);
         } catch (Exception e) {
             menu.result = new StringBuilder("Error creating student: " + e.getMessage());
@@ -220,6 +253,7 @@ public class MavTutor {
             
             Tutor tutor = new Tutor(name, email, ssn, bio, course);
             tutors.add(tutor);
+            dirty = true;
             menu.result = new StringBuilder("Tutor created: " + tutor);
         } catch (Exception e) {
             menu.result = new StringBuilder("Error creating tutor: " + e.getMessage());
@@ -263,6 +297,7 @@ public class MavTutor {
             }
             
             sessions.add(session);
+            dirty = true;
             menu.result = new StringBuilder("Session created: " + session);
         } catch (Exception e) {
             menu.result = new StringBuilder("Error creating session: " + e.getMessage());
@@ -275,7 +310,11 @@ public class MavTutor {
     }
     
     public void quit() {
-        menu.result = null; 
+        if (!safeToDiscardData()) {
+            menu.result = new StringBuilder("Quit cancelled.");
+            return;
+        }
+        menu.result = null;
     }
     
     @Override
