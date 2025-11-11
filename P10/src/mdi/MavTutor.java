@@ -62,7 +62,13 @@ public class MavTutor {
             System.out.println("No items available to review.");
             return;
         }
+
+        // Select item from list
+        Rateable selected = Menu.selectItemFromList("Select item to review:", list);
+        if (selected == null) return;
         
+    }
+
     private void newz() {
         if (!safeToDiscardData()) {
             menu.result = new StringBuilder("Operation cancelled.");
