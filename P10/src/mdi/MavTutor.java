@@ -2,19 +2,19 @@ package mdi;
 
 import menu.Menu;
 import menu.MenuItem;
-import people.Person;
 import people.Student;
 import people.Tutor;
+import people.Person;
 import session.Course;
 import session.Session;
 import session.InvalidCourseException;
+import rating.Rateable;
+import rating.Rating;
+import rating.Comment;
 
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Scanner;
-
-import javax.xml.stream.events.Comment;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class MavTutor {
     private Menu menu;
     private File file = null;
     private boolean dirty = false;
-    private Person currentUser = null; // For bonus feature
+    private Person currentUser = null; 
     
     public MavTutor() {
         initializeMenu();
@@ -60,18 +60,16 @@ public class MavTutor {
         );
     }
     
-    // Generic review method for P10
     private void review(List<? extends Rateable> list) {
         if (list.isEmpty()) {
             System.out.println("No items available to review.");
             return;
         }
         
-        // Select item from list
-        Rateable selected = Menu.selectItemFromList("Select item to review:", list);
-        if (selected == null) return;
+        Integer index = Menu.selectItemFromList("Select item to review:", list);
+        if (index == null) return;
+        Rateable selected = list.get(index);
         
-        // Show average rating
         double avgRating = selected.getAverageRating();
         if (Double.isNaN(avgRating)) {
             System.out.println("No ratings yet.");
@@ -79,34 +77,33 @@ public class MavTutor {
             System.out.printf("Average rating: %.1f stars\n", avgRating);
         }
         
-        // Login (or use current user for bonus)
         Person user = login();
         if (user == null && currentUser != null) {
-            user = currentUser; // Use remembered user for bonus
+            user = currentUser; 
         }
         
-        // Allow user to add rating and review
+        
         if (user != null) {
             System.out.println("Logged in as: " + user.getName());
-            Integer stars = Menu.getInt("Enter rating (1-5 stars, or 0 to skip):", 0, 5);
-            if (stars != null && stars > 0) {
+            Integer stars = Menu.getInt("Enter rating (1-5 stars, or 0 to skip):");
+            if (stars != null && stars > 0 && stars <= 5) {
                 String reviewText = Menu.getString("Enter your review:");
                 if (reviewText != null && !reviewText.trim().isEmpty()) {
-                    Rating newRating = new Rating(stars, reviewText, user);
+                    Comment reviewComment = new Comment(reviewText, user, null);
+                    Rating newRating = new Rating(stars, reviewComment);
                     selected.addRating(newRating);
                     System.out.println("Rating added!");
                     dirty = true;
                 }
+            } else if (stars != null && (stars < 0 || stars > 5)) {
+                System.out.println("Invalid rating. Must be between 1 and 5.");
             }
         }
         
-        // Browse existing ratings
         browseRatings(selected, user);
     }
-    
-    // Login method for P10
+
     private Person login() {
-        // For bonus: if already logged in, offer different options
         if (currentUser != null) {
             String[] options = {
                 "Continue as " + currentUser.getName(),
@@ -121,12 +118,12 @@ public class MavTutor {
             switch(choice) {
                 case 0: return currentUser;
                 case 1: 
-                    Tutor tutor = Menu.selectItemFromList("Select tutor:", tutors);
-                    if (tutor != null) currentUser = tutor;
+                    Integer tutorIndex = Menu.selectItemFromList("Select tutor:", tutors);
+                    if (tutorIndex != null) currentUser = tutors.get(tutorIndex);
                     return currentUser;
                 case 2:
-                    Student student = Menu.selectItemFromList("Select student:", students);
-                    if (student != null) currentUser = student;
+                    Integer studentIndex = Menu.selectItemFromList("Select student:", students);
+                    if (studentIndex != null) currentUser = students.get(studentIndex);
                     return currentUser;
                 case 3:
                     currentUser = null;
@@ -134,7 +131,6 @@ public class MavTutor {
             }
         }
         
-        // Original login logic
         String[] loginOptions = {"Tutor", "Student", "Skip Login"};
         Integer loginType = Menu.selectItemFromArray("Login as:", loginOptions);
         
@@ -142,19 +138,24 @@ public class MavTutor {
         
         switch(loginType) {
             case 0:
-                Tutor tutor = Menu.selectItemFromList("Select tutor:", tutors);
-                if (tutor != null) currentUser = tutor; // Remember for bonus
-                return tutor;
+                Integer tutorIndex = Menu.selectItemFromList("Select tutor:", tutors);
+                if (tutorIndex != null) {
+                    currentUser = tutors.get(tutorIndex); 
+                    return currentUser;
+                }
+                return null;
             case 1:
-                Student student = Menu.selectItemFromList("Select student:", students);
-                if (student != null) currentUser = student; // Remember for bonus
-                return student;
+                Integer studentIndex = Menu.selectItemFromList("Select student:", students);
+                if (studentIndex != null) {
+                    currentUser = students.get(studentIndex); 
+                    return currentUser;
+                }
+                return null;
             default:
                 return null;
         }
     }
     
-    // Browse ratings and comments
     private void browseRatings(Rateable item, Person user) {
         Rating[] ratings = item.getRatings();
         if (ratings.length == 0) {
@@ -162,20 +163,19 @@ public class MavTutor {
             return;
         }
         
-        Rating selectedRating = Menu.selectItemFromArray("Select rating to view:", ratings);
-        if (selectedRating == null) return;
+        Integer ratingIndex = Menu.selectItemFromArray("Select rating to view:", ratings);
+        if (ratingIndex == null) return;
+        Rating selectedRating = ratings[ratingIndex];
         
         Comment currentComment = selectedRating.getReview();
         browseComments(currentComment, user);
     }
     
-    // Browse comments recursively
     private void browseComments(Comment comment, Person user) {
         while (true) {
             System.out.println("\n" + "=".repeat(50));
             printExpandedComments(comment, 0);
             
-            // Build menu options
             List<String> options = new ArrayList<>();
             options.add("Reply");
             if (comment.getInReplyTo() != null) {
@@ -198,7 +198,7 @@ public class MavTutor {
                     if (commenter == null) {
                         commenter = login();
                         if (commenter != null) {
-                            user = commenter; // Update user reference
+                            user = commenter; 
                         }
                     }
                     if (commenter != null) {
@@ -223,11 +223,13 @@ public class MavTutor {
                     if (comment.numReplies() > 0) {
                         System.out.println("Select reply:");
                         for (int i = 0; i < comment.numReplies(); i++) {
-                            System.out.println(i + ": " + comment.getReply(i).getCommenter().getName());
+                            System.out.println(i + ": " + comment.getReply(i).getAuthor().getName());
                         }
-                        Integer replyIndex = Menu.getInt("Enter reply number:", 0, comment.numReplies() - 1);
-                        if (replyIndex != null) {
+                        Integer replyIndex = Menu.getInt("Enter reply number:");
+                        if (replyIndex != null && replyIndex >= 0 && replyIndex < comment.numReplies()) {
                             comment = comment.getReply(replyIndex);
+                        } else if (replyIndex != null) {
+                            System.out.println("Invalid reply number.");
                         }
                     } else {
                         System.out.println("No replies available.");
@@ -239,8 +241,7 @@ public class MavTutor {
             }
         }
     }
-    
-    // Recursive comment printing methods (from P05)
+ 
     private void printExpandedComments(Comment c, int level) {
         printIndented(c.toString(), level);
         System.out.println();
@@ -267,7 +268,7 @@ public class MavTutor {
         sessions.clear();
         file = null;
         dirty = false;
-        currentUser = null; // Reset user for bonus
+        currentUser = null; 
         menu.result = new StringBuilder("All data cleared.");
     }
     
@@ -334,7 +335,7 @@ public class MavTutor {
                 tutors.clear();
                 sessions.clear();
                 file = openFile;
-                currentUser = null; // Reset user when opening new file
+                currentUser = null;
                 
                 int size = in.nextInt();
                 in.nextLine();
