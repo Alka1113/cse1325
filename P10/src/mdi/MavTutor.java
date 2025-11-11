@@ -5,6 +5,7 @@ import menu.MenuItem;
 import people.Student;
 import people.Tutor;
 import rating.Rateable;
+import rating.Rating;
 import session.Course;
 import session.Session;
 import session.InvalidCourseException;
@@ -67,6 +68,33 @@ public class MavTutor {
         Rateable selected = Menu.selectItemFromList("Select item to review:", list);
         if (selected == null) return;
         
+       // Show average rating
+        double avgRating = selected.getAverageRating();
+        if (Double.isNaN(avgRating)) {
+            System.out.println("No ratings yet.");
+        } else {
+            System.out.printf("Average rating: %.1f stars\n", avgRating);
+        }
+        
+      
+        // Allow user to add rating and review
+        if (user != null) {
+            System.out.println("Logged in as: " + user.getName());
+            Integer stars = Menu.getInt("Enter rating (1-5 stars, or 0 to skip):", 0, 5);
+            if (stars != null && stars > 0) {
+                String reviewText = Menu.getString("Enter your review:");
+                if (reviewText != null && !reviewText.trim().isEmpty()) {
+                    Rating newRating = new Rating(stars, reviewText, user);
+                    selected.addRating(newRating);
+                    System.out.println("Rating added!");
+                    dirty = true;
+                }
+            }
+        }
+        
+        // Browse existing ratings
+        browseRatings(selected, user);
+    }
     }
 
     private void newz() {
