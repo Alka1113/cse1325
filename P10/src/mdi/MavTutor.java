@@ -4,6 +4,7 @@ import menu.Menu;
 import menu.MenuItem;
 import people.Student;
 import people.Tutor;
+import rating.Rateable;
 import session.Course;
 import session.Session;
 import session.InvalidCourseException;
@@ -55,6 +56,13 @@ public class MavTutor {
         );
     }
     
+     // Generic review method for P10
+    private void review(List<? extends Rateable> list) {
+        if (list.isEmpty()) {
+            System.out.println("No items available to review.");
+            return;
+        }
+        
     private void newz() {
         if (!safeToDiscardData()) {
             menu.result = new StringBuilder("Operation cancelled.");
