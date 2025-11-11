@@ -2,10 +2,9 @@ package mdi;
 
 import menu.Menu;
 import menu.MenuItem;
+import people.Person;
 import people.Student;
 import people.Tutor;
-import rating.Rateable;
-import rating.Rating;
 import session.Course;
 import session.Session;
 import session.InvalidCourseException;
@@ -13,6 +12,9 @@ import session.InvalidCourseException;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.Scanner;
+
+import javax.xml.stream.events.Comment;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ public class MavTutor {
     private Menu menu;
     private File file = null;
     private boolean dirty = false;
+    private Person currentUser = null; // For bonus feature
     
     public MavTutor() {
         initializeMenu();
@@ -36,7 +39,7 @@ public class MavTutor {
         String title = "MavTutor Main Menu\n" + "=".repeat(18) + "\n";
         
         menu = new Menu(
-          new Object[] {clearScreen, title},  
+            new Object[] {clearScreen, title},  
             new Object[] {this, "\nSelection? "}, 
             new MenuItem("Create Course", this::newCourse),
             new MenuItem("Create Student", this::newStudent),
@@ -57,18 +60,18 @@ public class MavTutor {
         );
     }
     
-     // Generic review method for P10
+    // Generic review method for P10
     private void review(List<? extends Rateable> list) {
         if (list.isEmpty()) {
             System.out.println("No items available to review.");
             return;
         }
-
+        
         // Select item from list
         Rateable selected = Menu.selectItemFromList("Select item to review:", list);
         if (selected == null) return;
         
-       // Show average rating
+        // Show average rating
         double avgRating = selected.getAverageRating();
         if (Double.isNaN(avgRating)) {
             System.out.println("No ratings yet.");
@@ -76,7 +79,12 @@ public class MavTutor {
             System.out.printf("Average rating: %.1f stars\n", avgRating);
         }
         
-      
+        // Login (or use current user for bonus)
+        Person user = login();
+        if (user == null && currentUser != null) {
+            user = currentUser; // Use remembered user for bonus
+        }
+        
         // Allow user to add rating and review
         if (user != null) {
             System.out.println("Logged in as: " + user.getName());
@@ -95,8 +103,159 @@ public class MavTutor {
         // Browse existing ratings
         browseRatings(selected, user);
     }
+    
+    // Login method for P10
+    private Person login() {
+        // For bonus: if already logged in, offer different options
+        if (currentUser != null) {
+            String[] options = {
+                "Continue as " + currentUser.getName(),
+                "Login as Tutor", 
+                "Login as Student",
+                "Logout"
+            };
+            
+            Integer choice = Menu.selectItemFromArray("Login options:", options);
+            if (choice == null) return currentUser;
+            
+            switch(choice) {
+                case 0: return currentUser;
+                case 1: 
+                    Tutor tutor = Menu.selectItemFromList("Select tutor:", tutors);
+                    if (tutor != null) currentUser = tutor;
+                    return currentUser;
+                case 2:
+                    Student student = Menu.selectItemFromList("Select student:", students);
+                    if (student != null) currentUser = student;
+                    return currentUser;
+                case 3:
+                    currentUser = null;
+                    return null;
+            }
+        }
+        
+        // Original login logic
+        String[] loginOptions = {"Tutor", "Student", "Skip Login"};
+        Integer loginType = Menu.selectItemFromArray("Login as:", loginOptions);
+        
+        if (loginType == null) return null;
+        
+        switch(loginType) {
+            case 0:
+                Tutor tutor = Menu.selectItemFromList("Select tutor:", tutors);
+                if (tutor != null) currentUser = tutor; // Remember for bonus
+                return tutor;
+            case 1:
+                Student student = Menu.selectItemFromList("Select student:", students);
+                if (student != null) currentUser = student; // Remember for bonus
+                return student;
+            default:
+                return null;
+        }
     }
-
+    
+    // Browse ratings and comments
+    private void browseRatings(Rateable item, Person user) {
+        Rating[] ratings = item.getRatings();
+        if (ratings.length == 0) {
+            System.out.println("No ratings to browse.");
+            return;
+        }
+        
+        Rating selectedRating = Menu.selectItemFromArray("Select rating to view:", ratings);
+        if (selectedRating == null) return;
+        
+        Comment currentComment = selectedRating.getReview();
+        browseComments(currentComment, user);
+    }
+    
+    // Browse comments recursively
+    private void browseComments(Comment comment, Person user) {
+        while (true) {
+            System.out.println("\n" + "=".repeat(50));
+            printExpandedComments(comment, 0);
+            
+            // Build menu options
+            List<String> options = new ArrayList<>();
+            options.add("Reply");
+            if (comment.getInReplyTo() != null) {
+                options.add("Up");
+            }
+            if (comment.numReplies() > 0) {
+                options.add("Down");
+            }
+            options.add("Main Menu");
+            
+            String[] optionArray = options.toArray(new String[0]);
+            Integer choice = Menu.selectItemFromArray("Choose action:", optionArray);
+            
+            if (choice == null) return;
+            
+            String selectedOption = options.get(choice);
+            switch(selectedOption) {
+                case "Reply":
+                    Person commenter = user;
+                    if (commenter == null) {
+                        commenter = login();
+                        if (commenter != null) {
+                            user = commenter; // Update user reference
+                        }
+                    }
+                    if (commenter != null) {
+                        String replyText = Menu.getString("Enter your reply:");
+                        if (replyText != null && !replyText.trim().isEmpty()) {
+                            comment.addReply(replyText, commenter);
+                            System.out.println("Reply added!");
+                            dirty = true;
+                        }
+                    } else {
+                        System.out.println("Must be logged in to reply.");
+                    }
+                    break;
+                    
+                case "Up":
+                    if (comment.getInReplyTo() != null) {
+                        comment = comment.getInReplyTo();
+                    }
+                    break;
+                    
+                case "Down":
+                    if (comment.numReplies() > 0) {
+                        System.out.println("Select reply:");
+                        for (int i = 0; i < comment.numReplies(); i++) {
+                            System.out.println(i + ": " + comment.getReply(i).getCommenter().getName());
+                        }
+                        Integer replyIndex = Menu.getInt("Enter reply number:", 0, comment.numReplies() - 1);
+                        if (replyIndex != null) {
+                            comment = comment.getReply(replyIndex);
+                        }
+                    } else {
+                        System.out.println("No replies available.");
+                    }
+                    break;
+                    
+                case "Main Menu":
+                    return;
+            }
+        }
+    }
+    
+    // Recursive comment printing methods (from P05)
+    private void printExpandedComments(Comment c, int level) {
+        printIndented(c.toString(), level);
+        System.out.println();
+        for (int i = 0; i < c.numReplies(); ++i) {
+            printExpandedComments(c.getReply(i), level + 1);
+        }
+    }
+    
+    private void printIndented(String multiline, int level) {
+        String[] strings = multiline.split("\n");
+        for (String s : strings) {
+            System.out.println(" ".repeat(level) + s);
+        }
+    }
+    
     private void newz() {
         if (!safeToDiscardData()) {
             menu.result = new StringBuilder("Operation cancelled.");
@@ -108,6 +267,7 @@ public class MavTutor {
         sessions.clear();
         file = null;
         dirty = false;
+        currentUser = null; // Reset user for bonus
         menu.result = new StringBuilder("All data cleared.");
     }
     
@@ -174,6 +334,7 @@ public class MavTutor {
                 tutors.clear();
                 sessions.clear();
                 file = openFile;
+                currentUser = null; // Reset user when opening new file
                 
                 int size = in.nextInt();
                 in.nextLine();
