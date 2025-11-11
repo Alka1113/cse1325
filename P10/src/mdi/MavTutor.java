@@ -34,7 +34,7 @@ public class MavTutor {
         String title = "MavTutor Main Menu\n" + "=".repeat(18) + "\n";
         
         menu = new Menu(
-            new Object[] {clearScreen, title},  
+          new Object[] {clearScreen, title},  
             new Object[] {this, "\nSelection? "}, 
             new MenuItem("Create Course", this::newCourse),
             new MenuItem("Create Student", this::newStudent),
@@ -44,6 +44,9 @@ public class MavTutor {
             new MenuItem("View Students", () -> selectView(students)),
             new MenuItem("View Tutors", () -> selectView(tutors)),
             new MenuItem("View Sessions", () -> selectView(sessions)),
+            new MenuItem("Review Students", () -> review(students)),
+            new MenuItem("Review Tutors", () -> review(tutors)),
+            new MenuItem("Review Sessions", () -> review(sessions)),
             new MenuItem("New", this::newz),
             new MenuItem("Save As", this::saveAs),
             new MenuItem("Save", this::save),
