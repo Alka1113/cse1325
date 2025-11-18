@@ -1,3 +1,10 @@
+package bonus.src;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import bonus.src.qlogger.Qlogger;
+
 public class PooledPrimes extends Primes {
     private static final int SLICES = 50;
     private long currentSlice;

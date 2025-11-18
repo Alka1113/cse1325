@@ -1,4 +1,4 @@
-package qlogger;
+package bonus.src.qlogger;
 
 /**
  * Trivial logger to System.err or a file.

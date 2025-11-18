@@ -1,3 +1,5 @@
+package bonus.src;
+
 import qlogger.Qlogger;
 
 public class ListPrimes {
