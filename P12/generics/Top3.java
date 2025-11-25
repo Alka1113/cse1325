@@ -11,20 +11,32 @@ public class Top3<T>{
     }
 
     public void add(T x){
-          if (first == null) {
+        if (first == null) {
             first = x;
-        } else if ( x - first > 0) {
+        } else if (isGreater(x, first)) {
             third = second;
             second = first;
             first = x;
-        } else if (second == null || x - second > 0) {
+        } else if (second == null || isGreater(x, second)) {
             third = second; 
             second = x; 
-        } else if (third == null || x - third > 0) {
+        } else if (third == null || isGreater(x, third)) {
             third = x;
         }
-     }
-
+    }
+    
+    private boolean isGreater(T a, T b) {
+        if (a instanceof Double && b instanceof Double) {
+            return (Double)a > (Double)b;
+        }
+        if (a instanceof Integer && b instanceof Integer) {
+            return (Integer)a > (Integer)b;
+        }
+        if (a instanceof Quadratic && b instanceof Quadratic) {
+            return ((Quadratic)a).f() > ((Quadratic)b).f();
+        }
+        return false;
+    }
     public T getFirst() { return first; }
     public T getSecond() { return second; }
     public T getThird() { return third; }
