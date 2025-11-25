@@ -1,6 +1,5 @@
 package generics;
-
-public class Quadratic {
+public class Quadratic implements Comparable<Quadratic> {
     public static double x;
     private double a, b, c;
     
@@ -15,8 +14,15 @@ public class Quadratic {
     }
     
     @Override
-    public int compareTo(q Quadratic){
+    public int compareTo(Quadratic q) { 
+        double classValue = this.f();
+        double outerValue = q.f();
         
+        if (classValue > outerValue) {
+            return 1;
+        } else if (classValue < outerValue) {
+            return -1;
+        } else {return 0;}
     }
     @Override
     public String toString() {
