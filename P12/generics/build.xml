@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Generics" default="compile" basedir=".">
+<property name="author" value="Alka Shukla"/>
+    
+    <property name="src" location="."/>
+    
+    <target name="compile">
+        <javac srcdir="${src}" includeantruntime="false"/>
+    </target>
+    
+    <target name="run" depends="compile">
+        <java classname="DemoTop3"/>
+    </target>
+    
+    <target name="clean">
+        <delete>
+            <fileset dir="." includes="**/*.class"/>
+        </delete>
+    </target>
+</project>
