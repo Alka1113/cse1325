@@ -35,5 +35,10 @@ import java.util.Random;
                 System.err.println("Thread interrupted: " + e.getMessage());
             }
         }
-
+        public static void main(String[] args) {
+            int digits = args.length > 0 ? Integer.parseInt(args[0]) : 10;
+            RandomLong randomLong = new RandomLong(digits);
+            System.out.println("Generated Random Long: " + randomLong.nextLong());
+        }
     }
+    
